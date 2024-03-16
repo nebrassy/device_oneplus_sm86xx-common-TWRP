@@ -1,7 +1,5 @@
 # Copyright (c) 2012-2015, 2017-2021, The Linux Foundation. All rights reserved.
 #
-# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
-#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #     * Redistributions of source code must retain the above copyright
@@ -28,7 +26,7 @@
 #
 #
 # Changes from Qualcomm Innovation Center are provided under the following license:
-# Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
+# Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted (subject to the limitations in the
@@ -61,12 +59,15 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+#Import rc file
+import /vendor/etc/ueventd.qcom.userdebug.rc
+
+
 # Firmware directory Path
 # Below macro will be read by uevent and path will
 # be added to search path for firmware loading
-
 # ifndef OPLUS_FEATURE_WIFI_BDF
-# lixiong2@CONNECTIVITY.WIFI.HARDWARE.BDF.2940246 , 2022/06/24,
+# fangzhijun@CONNECTIVITY.WIFI.HARDWARE.BDF.5719240 , 2023/06/13,
 # Modify for: multi projects using different bdf, adding persist into firmware_directories
 # firmware_directories /vendor/firmware_mnt/image/
 # else /* OPLUS_FEATURE_WIFI_BDF */
@@ -112,8 +113,11 @@ subsystem mem_buf_vm
 /dev/ipa_odl_ctl          0660   radio      radio
 /dev/ipa_adpl             0660   system     oem_2905
 /dev/synx_device          0660   root       camera
+/dev/ubwcp                0660   root       camera
 /dev/hab                  0666   system     system
 /dev/iio:device*          0664   system     system
+/dev/qmc_dma              0660   radio      radio
+/dev/qmc_cma              0660   radio      radio
 
 #permissions for UFS RPMB BSG device node
 /dev/0:0:0:49476          0600   system     system
@@ -129,6 +133,8 @@ subsystem mem_buf_vm
 /dev/smd3                 0660   bluetooth  bluetooth
 /dev/btpower              0660   bluetooth  system
 /dev/btfmslim             0660   bluetooth  system
+/dev/bt_cp_ctrl           0660   bluetooth  system
+/dev/btfmcodec_dev        0660   bluetooth  system
 
 #permissions for pta
 /dev/pta                  0660   system     system
@@ -195,6 +201,7 @@ subsystem mem_buf_vm
 /dev/qce                  0660   system     drmrpc
 /dev/smcinvoke            0660   system     drmrpc
 /dev/qsee_ipc_irq_spss    0660   system     drmrpc
+/dev/qti-smmu-proxy       0660   system     system
 /dev/seemplog             0660   system     system
 /dev/pft                  0660   system     drmrpc
 /dev/spcom                0660   system     system
@@ -264,7 +271,6 @@ subsystem mem_buf_vm
 /dev/msm_vidc_dec_sec     0660   system     audio
 /dev/msm_vidc_enc         0660   system     audio
 /dev/msm_rotator          0660   system     system
-/dev/hw_random            0600   root       root
 /dev/sdsprpc-smd          0660   system     system
 
 #permissions for audio
@@ -440,22 +446,25 @@ subsystem mem_buf_vm
 # Kmsg device
 /dev/kmsg                                               0620   root       system
 
-# Huaiwei.Ding@BSP.Kernel.Stability, 2021/07/01, add for explorer project
-/dev/explorer_preisp                                    0660   cameraserver   camera
-
 # LED class devices
 /sys/class/leds/red      delay_on     0640    system    system
 /sys/class/leds/red      delay_off    0640    system    system
 /sys/class/leds/red      breath       0640    system    system
+/sys/class/leds/red      repeat       0640    system    system
+/sys/class/leds/red      hw_pattern   0640    system    system
 /sys/class/leds/red      trigger      0640    system    system
 /sys/class/leds/green    delay_on     0640    system    system
 /sys/class/leds/green    delay_off    0640    system    system
 /sys/class/leds/green    breath       0640    system    system
 /sys/class/leds/green    trigger      0640    system    system
+/sys/class/leds/green    repeat       0640    system    system
+/sys/class/leds/green    hw_pattern   0640    system    system
 /sys/class/leds/blue     delay_on     0640    system    system
 /sys/class/leds/blue     delay_off    0640    system    system
 /sys/class/leds/blue     breath       0640    system    system
 /sys/class/leds/blue     trigger      0640    system    system
+/sys/class/leds/blue     repeat       0640    system    system
+/sys/class/leds/blue     hw_pattern   0640    system    system
 
 # NPU device
 /dev/msm_npu             0644   system     system
@@ -465,8 +474,25 @@ subsystem mem_buf_vm
 /sys/class/dual_role_usb/*	power_role	0660	system	system
 /sys/class/dual_role_usb/*	mode		0660	system	system
 
+/sys/class/typec/port0		data_role	0660	system	usb
+/sys/class/typec/port0		power_role	0660	system	usb
+/sys/class/typec/port0		port_type	0660	system	usb
+/sys/class/typec/port0-partner	accessory_mode	0440	system	usb
+
 # USB Dynamic Disable
 /sys/bus/platform/devices/a600000.ssusb	dynamic_disable	0220	root	usb
+
+# USB autosuspend/wakeup settings
+/sys/bus/usb/devices/*      power/autosuspend          0660  system  usb
+/sys/bus/usb/devices/*      power/autosuspend_delay_ms 0660  system  usb
+/sys/bus/usb/devices/*      power/control              0660  system  usb
+/sys/bus/usb/devices/*      power/wakeup               0660  system  usb
+
+#USB root hub authorize setting
+/sys/bus/usb/devices/usb*   authorized                 0660  system  usb
+
+#USB mode setting
+/sys/bus/platform/devices/a600000.ssusb    mode        0660  system  usb
 
 #Memory Offline
 /sys/devices/system/memory/memory* state    0660 system system
@@ -573,18 +599,11 @@ subsystem mem_buf_vm
 # devcoredump data attributes
 /sys/class/devcoredump/devcd*                           data                            0600    system  system
 
-# qdss sysfs node attributes
-/sys/bus/coresight/devices/coresight-tmc-etf/curr_sink          0664   system   system
-/sys/bus/coresight/devices/coresight-tmc-etf/enable_sink        0664   system   system
-/sys/bus/coresight/devices/coresight-tmc-etr/curr_sink          0664   system   system
-/sys/bus/coresight/devices/coresight-tmc-etr/enable_sink        0664   system   system
-/sys/bus/coresight/devices/coresight-tmc-etr/out_mode           0664   system   system
-/sys/bus/coresight/devices/coresight-tpiu/curr_sink             0664   system   system
-/sys/bus/coresight/devices/coresight-tpiu/out_mode              0664   system   system
-/sys/bus/coresight/devices/coresight-stm/enable                 0664   system   system
-/sys/bus/coresight/devices/coresight-stm/enable_source          0664   system   system
-/sys/bus/coresight/devices/coresight-hwevent/enable             0664   system   system
-/sys/bus/coresight/devices/coresight-stm/hwevent_enable         0664   system   system
-/sys/bus/coresight/devices/coresight-hwevent/setreg             0664   system   system
-/sys/bus/coresight/devices/coresight-swao-csr/timestamp         0664   system   system
-/sys/bus/coresight/devices/coresight-modem-diag/enable_source   0664   system   system
+#Virtualization Attributes
+/dev/gunyah                 0666   root     root
+
+# Tango 32-bit kernel support
+/dev/tango32                0666   system     system
+
+# Q2SPI UWB device
+/dev/q2spiuwb    0660    uwb    uwb
