@@ -105,7 +105,9 @@ PRODUCT_PACKAGES += \
 
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += \
-    $(COMMON_PATH)
+    $(COMMON_PATH) \
+    hardware/oplus
+
 
 #namespace definition for librecovery_updater
 #differentiate legacy 'sg' or 'bsg' framework

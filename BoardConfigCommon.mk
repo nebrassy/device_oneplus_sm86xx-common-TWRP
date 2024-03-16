@@ -51,6 +51,12 @@ BOARD_EXCLUDE_KERNEL_FROM_RECOVERY_IMAGE := true
 BOARD_KERNEL_IMAGE_NAME := kernel
 BOARD_RAMDISK_USE_LZ4 := true
 TARGET_PREBUILT_KERNEL := $(COMMON_PATH)/prebuilt/$(BOARD_KERNEL_IMAGE_NAME)
+TARGET_KERNEL_SOURCE := kernel/oneplus/sm8650
+TARGET_KERNEL_CONFIG := \
+    gki_defconfig \
+    vendor/pineapple_GKI.config \
+    vendor/oplus/pineapple_GKI.config \
+    vendor/debugfs.config
 
 # Partition Info
 BOARD_PROPERTY_OVERRIDES_SPLIT_ENABLED := true
