@@ -43,7 +43,7 @@ service overrideprops /system/bin/overrideprops.sh
 
 on init
     #start boot-hal-1-2
-    start boot-qti
+    #start boot-qti
 
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
