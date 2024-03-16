@@ -56,6 +56,9 @@ on boot
     start overrideprops
 
 on property:twrp.modules.loaded=true
+    # Mount persist
+    mkdir /mnt/vendor/persist
+    mount ext4 /dev/block/bootdevice/by-name/persist /mnt/vendor/persist ro
     # Mount firmware
     mkdir /firmware
     mount vfat /dev/block/bootdevice/by-name/modem${ro.boot.slot_suffix} /firmware ro
@@ -67,3 +70,7 @@ on property:twrp.modules.loaded=true
     start health-hal-2-1
     start vendor.oplus.vibrator
     umount /firmware
+
+on property:twrp.all.users.decrypted=true
+    umount /mnt/vendor/persist
+
